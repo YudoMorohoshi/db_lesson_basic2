@@ -1,0 +1,151 @@
+Q1 
+
+    CREATE TABLE departments (
+    department_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+Q2 
+
+ALTER TABLE people ADD COLUMN department_id INT(10) UNSIGNED AFTER email;
+
+
+Q3
+
+追加する部署一覧(departments)
+営業
+開発
+経理
+人事
+情報システム
+部署のレコードを追加するにあたって順番は前後しても構いません。
+
+
+Q3-1
+
+INSERT INTO departments (name) VALUES ('営業');
+INSERT INTO departments (name) VALUES ('開発');
+INSERT INTO departments (name) VALUES ('経理');
+INSERT INTO departments (name) VALUES ('人事');
+INSERT INTO departments (name) VALUES ('情報システム');
+
+
+追加する人の条件(people)
+10人分のレコードを追加する
+人数比率は営業3人、開発4人、経理1人、人事1人、情報システム1人
+
+
+Q3-2
+
+INSERT INTO people (name, email, department_id, age, gender) VALUES
+('山田太郎', 'yamada1@gizumo.jp', 1, 30, 1),
+('佐々木花子', 'sasaki1@gizumo.jp', 2, 35, 2),
+('中島健', 'nakajima1@gizumo.jp', 1, 28, 1),
+('井上智子', 'inoue1@gizumo.jp', 2, 40, 2),
+('斎藤優', 'saito1@gizumo.jp', 2, 33, 2),
+('藤本健', 'fujimoto1@gizumo.jp', 3, 29, 1),
+('田村誠', 'tamura1@gizumo.jp', 4, 36, 2),
+('木村美咲', 'kimura1@gizumo.jp', 5, 31, 1),
+('山本健', 'yamamoto2@gizumo.jp', 1, 27, 1),
+('渡辺真理', 'watanabe1@gizumo.jp', 2, 28, 2);
+
+
+
+追加する日報の条件(reports)
+10件の日報を追加する
+日報は誰に紐付けてもいいが、存在しないperson_idとは紐付けない
+日報の文字数は最低10文字で、同じ日報を作成しない
+
+Q3-3
+INSERT INTO reports (person_id, content)
+VALUES
+(1, '営業部での今週の進捗状況。新規顧客との契約が完了しました。'),
+(2, '開発部で新しい機能のテストが行われました。次回のリリースに向けて修正作業が必要です。'),
+(3, '経理部の今月の経費報告。予算の使い過ぎを防ぐために調整を行いました。'),
+(4, '人事部からのお知らせ。新しい採用プロセスが開始されました。'),
+(6, '情報システム部でのサーバー管理状況。最新のセキュリティパッチが適用されました。'),
+(17, '営業部の定期会議での議事録。顧客からのフィードバックを元に改善策を検討しました。'),
+(18, '開発部のプロジェクト進捗。次回のデモに向けて準備を進めています。'),
+(19, '営業部の顧客訪問報告。新規契約の可能性が高まっています。'),
+(20, '開発部のコードレビュー結果。修正が必要な部分がいくつか見つかりました。'),
+(21, '人事部の福利厚生プログラムに関する報告。社員の満足度向上を目指した施策が検討されています。');
+
+
+Q4
+
+UPDATE people
+SET department_id = CASE person_id
+    WHEN 1 THEN 3
+    WHEN 2 THEN 5
+    WHEN 3 THEN 1
+    WHEN 4 THEN 4
+    WHEN 6 THEN 1
+    ELSE department_id
+END
+WHERE department_id IS NULL;
+
+
+
+Q5
+
+SELECT name, age
+FROM people
+WHERE gender = 1
+ORDER BY age DESC;
+
+Q6
+peopleテーブルからdepartment_id が1のレコードのname、email、ageのカラムデータを選びその結果をcreated_at カラムに基づいて昇順に並べ替えて取得するクエリ。
+
+Q7
+
+SELECT name
+FROM people
+WHERE (age BETWEEN 20 AND 29 AND gender = 2)
+   OR (age BETWEEN 40 AND 49 AND gender = 1);
+
+Q8
+
+SELECT name, age
+FROM people
+WHERE department_id = 1
+ORDER BY age ASC;
+
+
+Q9
+開発部に所属している女性の平均年齢を取得してください。
+条件
+カラム名はaverage_ageとなるようにしましょう
+
+SELECT AVG(age) AS average_age
+FROM people
+WHERE department_id = 2 AND gender = 2;
+
+Q10
+名前と部署名とその人が提出した日報の内容を同時に取得してください。（日報を提出していない人は含めない）
+
+SELECT
+    p.name AS person_name,
+    d.name AS department_name,
+    r.content AS report_content
+FROM
+    people p
+JOIN
+    departments d ON p.department_id = d.department_id
+JOIN
+    reports r ON p.person_id = r.person_id;
+
+
+Q11
+
+SELECT
+    p.name
+FROM
+    people p
+LEFT JOIN
+    reports r ON p.person_id = r.person_id
+WHERE
+    r.report_id IS NULL;
+
